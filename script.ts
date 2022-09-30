@@ -17,7 +17,7 @@ const infinite: boolean = false;
 
 var paused: boolean = true;
 
-const canvas: any = document.querySelector('.canvas');
+const canvas = <HTMLCanvasElement> document.querySelector('.canvas');
 var width = canvas.width
 var height = canvas.height
 if (infinite) {
@@ -28,7 +28,7 @@ else {
   width = canvas.width = 150;
   height = canvas.height = 150;
 }
-const ctx = canvas.getContext('2d');
+const ctx = <CanvasRenderingContext2D> canvas.getContext('2d');
 
 function draw() {
   ctx.fillStyle = 'rgb(0, 0, 0)';
@@ -94,7 +94,7 @@ function checkCell(x: number, y: number) {
 }
 
 function checkNeighbors(x: number, y: number) {
-  var neighbors = 0;
+  var neighbors: number = 0;
   for (let ny = -1; ny <= 1; ny++) {
     for (let nx = -1; nx <= 1; nx++) {
       if (!(nx == 0 && ny == 0)) {
