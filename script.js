@@ -1,6 +1,6 @@
 "use strict";
-var World = [];
-var toLookWorld = [];
+var map = [];
+var toLookMap = [];
 const infinite = false;
 var paused = true;
 const canvas = document.querySelector('.canvas');
@@ -19,9 +19,9 @@ function draw() {
     ctx.fillStyle = 'rgb(0, 0, 0)';
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = 'rgb(255, 255, 255)';
-    for (const cy in World) {
+    for (const cy in map) {
         var y = Number(cy);
-        for (const cx in World[y]) {
+        for (const cx in map[y]) {
             var x = Number(cx);
             var state = checkCell(x, y);
             ctx.fillRect(x, y, 1, 1);
@@ -43,29 +43,29 @@ function fixPos(x, y) {
     }
     return [x, y];
 }
-function setCell(x, y, state, sWorld = World, tlWorld = toLookWorld, drawit = true) {
+function setCell(x, y, state, smap = map, tlmap = toLookMap, drawit = true) {
     [x, y] = fixPos(x, y);
-    if (!sWorld[y])
-        sWorld[y] = [];
+    if (!smap[y])
+        smap[y] = [];
     if (typeof state == 'undefined')
-        state = !sWorld[y][x];
+        state = !smap[y][x];
     if (state == true) {
-        sWorld[y][x] = true;
+        smap[y][x] = true;
         for (let ny = -1; ny <= 1; ny++) {
             for (let nx = -1; nx <= 1; nx++) {
                 var sx = x + nx;
                 var sy = y + ny;
                 if (sx >= 0 && sy >= 0 || !infinite) {
                     [sx, sy] = fixPos(sx, sy);
-                    if (!tlWorld[sy])
-                        tlWorld[sy] = [];
-                    tlWorld[sy][sx] = true;
+                    if (!tlmap[sy])
+                        tlmap[sy] = [];
+                    tlmap[sy][sx] = true;
                 }
             }
         }
     }
     else
-        sWorld[y].splice(x, 1);
+        smap[y].splice(x, 1);
     if (drawit)
         draw();
 }
@@ -76,7 +76,7 @@ function setCells(state, x, y, ...cells) {
     draw();
 }
 function checkCell(x, y) {
-    if (typeof World[y] == 'undefined' || typeof World[y][x] == 'undefined')
+    if (typeof map[y] == 'undefined' || typeof map[y][x] == 'undefined')
         return false;
     return true;
 }
@@ -95,24 +95,24 @@ function checkNeighbors(x, y) {
     return neighbors;
 }
 function update() {
-    var newWorld = [];
-    var newToLookWorld = [];
-    for (const my in toLookWorld) {
-        for (const mx in toLookWorld[my]) {
+    var newMap = [];
+    var newToLookMap = [];
+    for (const my in toLookMap) {
+        for (const mx in toLookMap[my]) {
             var x = Number(mx);
             var y = Number(my);
             var s = checkCell(x, y);
             var n = checkNeighbors(x, y);
             if (n == 3 || n == 2 && s == true) {
-                setCell(x, y, true, newWorld, newToLookWorld, false);
+                setCell(x, y, true, newMap, newToLookMap, false);
             }
             else {
-                setCell(x, y, false, newWorld, newToLookWorld, false);
+                setCell(x, y, false, newMap, newToLookMap, false);
             }
         }
     }
-    World = newWorld;
-    toLookWorld = newToLookWorld;
+    map = newMap;
+    toLookMap = newToLookMap;
     draw();
 }
 function spawnGlider(x, y) {
