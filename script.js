@@ -19,13 +19,12 @@ function draw() {
     ctx.fillStyle = 'rgb(0, 0, 0)';
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = 'rgb(255, 255, 255)';
-    for (var y = 0; y < map.length; y++) {
-        if (map[y]) {
-            for (var x = 0; x < map[y].length; x++) {
-                var state = checkCell(x, y);
-                if (map[y][x])
-                    ctx.fillRect(x, y, 1, 1);
-            }
+    for (var cy in map) {
+        var y = Number(cy);
+        for (var cx in map[y]) {
+            var x = Number(cx);
+            var state = checkCell(x, y);
+            ctx.fillRect(x, y, 1, 1);
         }
     }
 }

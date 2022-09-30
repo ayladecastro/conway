@@ -34,13 +34,12 @@ function draw() {
   ctx.fillStyle = 'rgb(0, 0, 0)';
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = 'rgb(255, 255, 255)';
-  for (let y = 0; y < map.length; y++) {
-    if (map[y]) {
-      for (let x = 0; x < map[y].length; x++) {
-        var state = checkCell(x, y)
-        if (map[y][x])
-          ctx.fillRect(x, y, 1, 1);
-      }
+  for (const cy in map) {
+    var y = Number(cy)
+    for (const cx in map[y]) {
+      var x = Number(cx)
+      var state = checkCell(x, y)
+       ctx.fillRect(x, y, 1, 1);
     }
   }
 }
@@ -102,7 +101,6 @@ function checkNeighbors(x: number, y: number) {
         var sx = x + nx;
         var sy = y + ny;
         [sx, sy] = fixPos(sx, sy)
-
         neighbors += Number(checkCell(sx, sy));
       }
     }
