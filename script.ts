@@ -1,17 +1,17 @@
-interface MapY extends Array<unknown> {
+interface WorldY extends Array<unknown> {
   [index: number]: boolean;
 }
 
-interface Map extends Array<unknown> {
-  [index: number]: MapY;
+interface World extends Array<unknown> {
+  [index: number]: WorldY;
 }
 
 interface Vector2 extends Array<unknown> {
   [index: number]: number;
 }
 
-var map: Map = [];
-var toLookMap: Map = [];
+var map: World = [];
+var toLookMap: World = [];
 
 const infinite: boolean = false;
 
@@ -56,8 +56,8 @@ function fixPos(x: number, y: number) {
   return [x, y]
 }
 
-function setCell(x: number, y: number, state?: boolean, smap: Map = map,
-  tlmap: Map = toLookMap, drawit: boolean = true) {
+function setCell(x: number, y: number, state?: boolean, smap: World = map,
+  tlmap: World = toLookMap, drawit: boolean = true) {
   [x, y] = fixPos(x, y)
   if (!smap[y]) smap[y] = [];
   if (typeof state == 'undefined') state = !smap[y][x];
@@ -109,8 +109,8 @@ function checkNeighbors(x: number, y: number) {
 }
 
 function update() {
-  var newMap: Map = [];
-  var newToLookMap: Map = [];
+  var newMap: World = [];
+  var newToLookMap: World = [];
   for (const my in toLookMap) {
     for (const mx in toLookMap[my]) {
       var x = Number(mx);

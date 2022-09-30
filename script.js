@@ -1,9 +1,9 @@
 "use strict";
-var map = [];
-var toLookMap = [];
-var infinite = false;
+var World = [];
+var toLookWorld = [];
+const infinite = false;
 var paused = true;
-var canvas = document.querySelector('.canvas');
+const canvas = document.querySelector('.canvas');
 var width = canvas.width;
 var height = canvas.height;
 if (infinite) {
@@ -14,14 +14,14 @@ else {
     width = canvas.width = 150;
     height = canvas.height = 150;
 }
-var ctx = canvas.getContext('2d');
+const ctx = canvas.getContext('2d');
 function draw() {
     ctx.fillStyle = 'rgb(0, 0, 0)';
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = 'rgb(255, 255, 255)';
-    for (var cy in map) {
+    for (const cy in World) {
         var y = Number(cy);
-        for (var cx in map[y]) {
+        for (const cx in World[y]) {
             var x = Number(cx);
             var state = checkCell(x, y);
             ctx.fillRect(x, y, 1, 1);
@@ -43,60 +43,51 @@ function fixPos(x, y) {
     }
     return [x, y];
 }
-function setCell(x, y, state, smap, tlmap, drawit) {
-    var _a, _b;
-    if (smap === void 0) { smap = map; }
-    if (tlmap === void 0) { tlmap = toLookMap; }
-    if (drawit === void 0) { drawit = true; }
-    _a = fixPos(x, y), x = _a[0], y = _a[1];
-    if (!smap[y])
-        smap[y] = [];
+function setCell(x, y, state, sWorld = World, tlWorld = toLookWorld, drawit = true) {
+    [x, y] = fixPos(x, y);
+    if (!sWorld[y])
+        sWorld[y] = [];
     if (typeof state == 'undefined')
-        state = !smap[y][x];
+        state = !sWorld[y][x];
     if (state == true) {
-        smap[y][x] = true;
-        for (var ny = -1; ny <= 1; ny++) {
-            for (var nx = -1; nx <= 1; nx++) {
+        sWorld[y][x] = true;
+        for (let ny = -1; ny <= 1; ny++) {
+            for (let nx = -1; nx <= 1; nx++) {
                 var sx = x + nx;
                 var sy = y + ny;
                 if (sx >= 0 && sy >= 0 || !infinite) {
-                    _b = fixPos(sx, sy), sx = _b[0], sy = _b[1];
-                    if (!tlmap[sy])
-                        tlmap[sy] = [];
-                    tlmap[sy][sx] = true;
+                    [sx, sy] = fixPos(sx, sy);
+                    if (!tlWorld[sy])
+                        tlWorld[sy] = [];
+                    tlWorld[sy][sx] = true;
                 }
             }
         }
     }
     else
-        smap[y].splice(x, 1);
+        sWorld[y].splice(x, 1);
     if (drawit)
         draw();
 }
-function setCells(state, x, y) {
-    var cells = [];
-    for (var _i = 3; _i < arguments.length; _i++) {
-        cells[_i - 3] = arguments[_i];
-    }
-    for (var key in cells) {
+function setCells(state, x, y, ...cells) {
+    for (const key in cells) {
         setCell(cells[key][0] + x, cells[key][1] + y, state, undefined, undefined, false);
     }
     draw();
 }
 function checkCell(x, y) {
-    if (typeof map[y] == 'undefined' || typeof map[y][x] == 'undefined')
+    if (typeof World[y] == 'undefined' || typeof World[y][x] == 'undefined')
         return false;
     return true;
 }
 function checkNeighbors(x, y) {
-    var _a;
     var neighbors = 0;
-    for (var ny = -1; ny <= 1; ny++) {
-        for (var nx = -1; nx <= 1; nx++) {
+    for (let ny = -1; ny <= 1; ny++) {
+        for (let nx = -1; nx <= 1; nx++) {
             if (!(nx == 0 && ny == 0)) {
                 var sx = x + nx;
                 var sy = y + ny;
-                _a = fixPos(sx, sy), sx = _a[0], sy = _a[1];
+                [sx, sy] = fixPos(sx, sy);
                 neighbors += Number(checkCell(sx, sy));
             }
         }
@@ -104,24 +95,24 @@ function checkNeighbors(x, y) {
     return neighbors;
 }
 function update() {
-    var newMap = [];
-    var newToLookMap = [];
-    for (var my in toLookMap) {
-        for (var mx in toLookMap[my]) {
+    var newWorld = [];
+    var newToLookWorld = [];
+    for (const my in toLookWorld) {
+        for (const mx in toLookWorld[my]) {
             var x = Number(mx);
             var y = Number(my);
             var s = checkCell(x, y);
             var n = checkNeighbors(x, y);
             if (n == 3 || n == 2 && s == true) {
-                setCell(x, y, true, newMap, newToLookMap, false);
+                setCell(x, y, true, newWorld, newToLookWorld, false);
             }
             else {
-                setCell(x, y, false, newMap, newToLookMap, false);
+                setCell(x, y, false, newWorld, newToLookWorld, false);
             }
         }
     }
-    map = newMap;
-    toLookMap = newToLookMap;
+    World = newWorld;
+    toLookWorld = newToLookWorld;
     draw();
 }
 function spawnGlider(x, y) {
