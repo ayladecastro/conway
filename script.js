@@ -32,14 +32,15 @@ function draw() {
 function fixPos(x, y) {
     // so we don't need to repeat (!infinite) each time fixPos appears
     if (!infinite) {
+        // won't work if position is bigger than width*2-1 or height*2-1
         if (x >= width)
-            x = 0;
+            x -= width;
         else if (x < 0)
-            x = width - 1;
+            x += width;
         if (y >= height)
-            y = 0;
+            y -= height;
         else if (y < 0)
-            y = height - 1;
+            y += height;
     }
     return [x, y];
 }
@@ -73,13 +74,13 @@ function setCell(x, y, state, smap, tlmap, drawit) {
     if (drawit)
         draw();
 }
-function setCells(state) {
+function setCells(state, x, y) {
     var cells = [];
-    for (var _i = 1; _i < arguments.length; _i++) {
-        cells[_i - 1] = arguments[_i];
+    for (var _i = 3; _i < arguments.length; _i++) {
+        cells[_i - 3] = arguments[_i];
     }
     for (var key in cells) {
-        setCell(cells[key][0], cells[key][1], state, undefined, undefined, false);
+        setCell(cells[key][0] + x, cells[key][1] + y, state, undefined, undefined, false);
     }
     draw();
 }
@@ -125,9 +126,9 @@ function update() {
     draw();
 }
 function spawnGlider(x, y) {
-    setCells(true, [x + 1, y + 1], [x + 2, y + 2], [x + 2, y + 3], [x + 1, y + 3], [x + 0, y + 3]);
+    setCells(true, x, y, [1, 1], [2, 2], [2, 3], [1, 3], [0, 3]);
 }
-spawnGlider(140, 140);
+spawnGlider(10, 10);
 function run() {
     if (!paused) {
         update();
