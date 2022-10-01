@@ -1,7 +1,8 @@
 "use strict";
 var map = [];
 var toLookMap = [];
-const infinite = false;
+var camera = { x: 0, y: 0 };
+const infinite = true;
 var paused = true;
 const canvas = document.querySelector('.canvas');
 var width = canvas.width;
@@ -24,7 +25,7 @@ function draw() {
         for (const cx in map[y]) {
             var x = Number(cx);
             var state = checkCell(x, y);
-            ctx.fillRect(x, y, 1, 1);
+            ctx.fillRect(x + camera.x, y + camera.y, 1, 1);
         }
     }
 }
@@ -113,24 +114,42 @@ function update() {
     }
     map = newMap;
     toLookMap = newToLookMap;
-    draw();
 }
 function spawnGlider(x, y) {
     setCells(true, x, y, [1, 1], [2, 2], [2, 3], [1, 3], [0, 3]);
 }
 spawnGlider(10, 10);
+setCell(0, 0, true);
 function run() {
     if (!paused) {
         update();
     }
+    draw();
 }
 setInterval(run, 16);
-document.addEventListener('keydown', function (event) {
-    if (event.key == ' ') {
+let keysPressed = {};
+document.addEventListener('keydown', (event) => {
+    keysPressed[event.key] = true;
+    if (keysPressed[' ']) {
         if (paused)
             paused = false;
         else
             paused = true;
     }
+    if (keysPressed['w']) {
+        camera.y -= 1;
+    }
+    if (keysPressed['s']) {
+        camera.y += 1;
+    }
+    if (keysPressed['a']) {
+        camera.x -= 1;
+    }
+    if (keysPressed['d']) {
+        camera.x += 1;
+    }
+});
+document.addEventListener('keyup', (event) => {
+    delete keysPressed[event.key];
 });
 //# sourceMappingURL=script.js.map
