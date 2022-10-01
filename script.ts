@@ -144,7 +144,7 @@ function run() {
 setInterval(run, 16);
 
 document.addEventListener('keydown', function(event) {
-  if(event.key == 'Enter') {
+  if(event.key == ' ') {
       if (paused) paused = false;
       else paused = true;
   }
