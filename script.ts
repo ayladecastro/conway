@@ -35,6 +35,15 @@ const ctx = <CanvasRenderingContext2D> canvas.getContext('2d');
 function draw() {
   ctx.fillStyle = 'rgb(0, 0, 0)';
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  /*ctx.fillStyle = 'rgb(60, 60, 60)';
+  for (const cy in toLookMap) {
+    var y = Number(cy)
+    for (const cx in toLookMap[y]) {
+      var x = Number(cx)
+      var state = checkCell(x, y)
+      ctx.fillRect(x + camera.x, y + camera.y, 1, 1);
+    }
+  }*/
   ctx.fillStyle = 'rgb(255, 255, 255)';
   for (const cy in map) {
     var y = Number(cy)
@@ -55,33 +64,37 @@ function fixPos(x: number, y: number) {
     if (y >= height) y -= height;
     else if (y < 0)  y += height;
   }
-  return [x, y]
+  return [x, y];
 }
 
-function setCell(x: number, y: number, state?: boolean, smap: World = map,
-  tlmap: World = toLookMap, drawit: boolean = true) {
-  [x, y] = fixPos(x, y)
-  if (!smap[y]) smap[y] = [];
-  if (typeof state == 'undefined') state = !smap[y][x];
-
-  if (state == true) {
-    smap[y][x] = true;
-    for (let ny = -1; ny <= 1; ny++) {
-      for (let nx = -1; nx <= 1; nx++) {
-        var sx: number = x + nx;
-        var sy: number = y + ny;
-        if (sx >= 0 && sy >= 0 || !infinite) {
-          [sx, sy] = fixPos(sx, sy)
-          if (!tlmap[sy]) tlmap[sy] = [];
-          tlmap[sy][sx] = true;
-        }
-      }
+function checkNeighbors(x: number, y: number, tlmap: World = toLookMap) {
+  var neighbors: number = 0;
+  for (let ny = -1; ny <= 1; ny++) {
+    for (let nx = -1; nx <= 1; nx++) {      
+      var sx = x + nx;
+      var sy = y + ny;
+      [sx, sy] = fixPos(sx, sy)
+      if (!tlmap[sy]) tlmap[sy] = [];
+      tlmap[sy][sx] = true;
+      if (!(nx == 0 && ny == 0)) neighbors += Number(checkCell(sx, sy));
     }
   }
-  else smap[y].splice(x, 1);
-
-  if (drawit) draw(); 
+  return neighbors;
 }
+
+function setCell(x: number, y: number, state?: boolean,
+  smap: World = map, tlmap: World = toLookMap, drawit: boolean = true) {
+    [x, y] = fixPos(x, y)
+    let lastState: boolean = map[y] && map[y][x] || false;
+    if (typeof state == 'undefined') state = !lastState;
+
+    if (state && !smap[y]) smap[y] = [];
+    if (state && !lastState) checkNeighbors(x, y, tlmap);
+    if (state) smap[y][x] = true;
+    else smap[y].splice(x, 1);
+
+    if (drawit) draw(); 
+  }
 
 function setCells(state: boolean, x: number, y: number, ...cells: Vector2[]) {
   for (const key in cells) {
@@ -95,21 +108,6 @@ function checkCell(x: number, y: number) {
   return true;
 }
 
-function checkNeighbors(x: number, y: number) {
-  var neighbors: number = 0;
-  for (let ny = -1; ny <= 1; ny++) {
-    for (let nx = -1; nx <= 1; nx++) {
-      if (!(nx == 0 && ny == 0)) {
-        var sx = x + nx;
-        var sy = y + ny;
-        [sx, sy] = fixPos(sx, sy)
-        neighbors += Number(checkCell(sx, sy));
-      }
-    }
-  }
-  return neighbors;
-}
-
 function update() {
   var newMap: World = [];
   var newToLookMap: World = [];
@@ -119,11 +117,8 @@ function update() {
       var y = Number(my);
       var s = checkCell(x, y);
       var n = checkNeighbors(x, y);
-      if (n == 3 || n == 2 && s == true) {
+      if (n == 3 || n == 2 && s /* || n == 6 && !s */) {
         setCell(x, y, true, newMap, newToLookMap, false);
-      }
-      else {
-        setCell(x, y, false, newMap, newToLookMap, false);
       }
     }
   }
@@ -136,7 +131,10 @@ function spawnGlider(x: number, y: number) {
 }
 
 spawnGlider(10,10)
-setCell(0, 0, true)
+setCells(true, 3, 3, [0, 0], [0, 1], [0, 2])
+//setCell(0, 0, true)
+//setCells(true, 50, 50, [2, 0], [3, 0], [4, 0], [1, 1], [4, 1],
+//  [0, 2], [4, 2], [0, 3], [3, 3], [0, 4], [1, 4], [2, 4]);
 
 function run() {
   if (!paused) {
@@ -150,9 +148,12 @@ let keysPressed: any = {};
 document.addEventListener('keydown', (event) => {
   keysPressed[event.key] = true;
 
-  if(keysPressed[' ']) {
+  if(keysPressed[' '] || keysPressed['Enter']) {
       if (paused) paused = false;
       else paused = true;
+  }
+  if(keysPressed['z']) {
+    update();
   }
   if(keysPressed['w']) {
     camera.y -= 1;
