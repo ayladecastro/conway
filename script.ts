@@ -10,18 +10,18 @@ interface Vector2 extends Array<unknown> {
   [index: number]: number;
 }
 
-var map: World = [];
-var toLookMap: World = [];
+let map: World = [];
+let toLookMap: World = [];
 
-var camera = {x: 0, y: 0}
+let camera = {x: 0, y: 0}
 
 const infinite: boolean = true;
 
-var paused: boolean = true;
+let paused: boolean = true;
 
 const canvas = <HTMLCanvasElement> document.querySelector('.canvas');
-var width = canvas.width
-var height = canvas.height
+let width = canvas.width
+let height = canvas.height
 if (infinite) {
   width = canvas.width = window.innerWidth;
   height = canvas.height = window.innerHeight;
@@ -35,21 +35,21 @@ const ctx = <CanvasRenderingContext2D> canvas.getContext('2d');
 function draw() {
   ctx.fillStyle = 'rgb(0, 0, 0)';
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  /*ctx.fillStyle = 'rgb(60, 60, 60)';
+  ctx.fillStyle = 'rgb(70, 70, 70)';
   for (const cy in toLookMap) {
-    var y = Number(cy)
+    let y = Number(cy)
     for (const cx in toLookMap[y]) {
-      var x = Number(cx)
-      var state = checkCell(x, y)
+      let x = Number(cx)
+      let state = checkCell(x, y)
       ctx.fillRect(x + camera.x, y + camera.y, 1, 1);
     }
-  }*/
+  }
   ctx.fillStyle = 'rgb(255, 255, 255)';
   for (const cy in map) {
-    var y = Number(cy)
+    let y = Number(cy)
     for (const cx in map[y]) {
-      var x = Number(cx)
-      var state = checkCell(x, y)
+      let x = Number(cx)
+      let state = checkCell(x, y)
       ctx.fillRect(x + camera.x, y + camera.y, 1, 1);
     }
   }
@@ -67,15 +67,17 @@ function fixPos(x: number, y: number) {
   return [x, y];
 }
 
-function checkNeighbors(x: number, y: number, tlmap: World = toLookMap) {
-  var neighbors: number = 0;
+function checkNeighbors(x: number, y: number, changeTLM = false, tlmap: World = toLookMap) {
+  let neighbors: number = 0;
   for (let ny = -1; ny <= 1; ny++) {
     for (let nx = -1; nx <= 1; nx++) {      
-      var sx = x + nx;
-      var sy = y + ny;
+      let sx = x + nx;
+      let sy = y + ny;
       [sx, sy] = fixPos(sx, sy)
-      if (!tlmap[sy]) tlmap[sy] = [];
-      tlmap[sy][sx] = true;
+      if (changeTLM) {
+        if (!tlmap[sy]) tlmap[sy] = [];
+        tlmap[sy][sx] = true;
+      }
       if (!(nx == 0 && ny == 0)) neighbors += Number(checkCell(sx, sy));
     }
   }
@@ -88,9 +90,15 @@ function setCell(x: number, y: number, state?: boolean,
     let lastState: boolean = map[y] && map[y][x] || false;
     if (typeof state == 'undefined') state = !lastState;
 
-    if (state && !smap[y]) smap[y] = [];
-    if (state && !lastState) checkNeighbors(x, y, tlmap);
-    if (state) smap[y][x] = true;
+    if (state) {
+      if (!lastState) checkNeighbors(x, y, true, tlmap);
+      else {
+        if (!tlmap[y]) tlmap[y] = [];
+        tlmap[y][x] = true;
+      }
+      if (!smap[y]) smap[y] = [];
+      smap[y][x] = true;
+    }
     else smap[y].splice(x, 1);
 
     if (drawit) draw(); 
@@ -109,15 +117,15 @@ function checkCell(x: number, y: number) {
 }
 
 function update() {
-  var newMap: World = [];
-  var newToLookMap: World = [];
+  let newMap: World = [];
+  let newToLookMap: World = [];
   for (const my in toLookMap) {
     for (const mx in toLookMap[my]) {
-      var x = Number(mx);
-      var y = Number(my);
-      var s = checkCell(x, y);
-      var n = checkNeighbors(x, y);
-      if (n == 3 || n == 2 && s /* || n == 6 && !s */) {
+      let x = Number(mx);
+      let y = Number(my);
+      let s: boolean = checkCell(x, y);
+      let n: number = checkNeighbors(x, y);
+      if (n == 3 || n == 2 && s /*|| n == 6 && !s*/) {
         setCell(x, y, true, newMap, newToLookMap, false);
       }
     }
@@ -131,7 +139,7 @@ function spawnGlider(x: number, y: number) {
 }
 
 spawnGlider(10,10)
-setCells(true, 3, 3, [0, 0], [0, 1], [0, 2])
+//setCells(true, 3, 3, [0, 0], [0, 1], [0, 2])
 //setCell(0, 0, true)
 //setCells(true, 50, 50, [2, 0], [3, 0], [4, 0], [1, 1], [4, 1],
 //  [0, 2], [4, 2], [0, 3], [3, 3], [0, 4], [1, 4], [2, 4]);
