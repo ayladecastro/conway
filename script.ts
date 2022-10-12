@@ -118,9 +118,9 @@ function update() {
   let newMap: World = [];
   let newToLookMap: World = [];
   for (const my in toLookMap) {
-    for (const mx in toLookMap[my]) {
-      let x = Number(mx);
-      let y = Number(my);
+    const y = Number(my);
+    for (const mx in toLookMap[y]) {
+      const x = Number(mx);
       let s: boolean = checkCell(x, y);
       let n: number = checkNeighbors(x, y);
       if (n == 3 || n == 2 && s /*|| n == 6 && !s*/) {
