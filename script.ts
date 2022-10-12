@@ -6,9 +6,7 @@ interface World extends Array<unknown> {
   [index: number]: WorldY;
 }
 
-interface Vector2 extends Array<unknown> {
-  [index: number]: number;
-}
+type Vector2 = [number, number]
 
 let map: World = [];
 let toLookMap: World = [];
